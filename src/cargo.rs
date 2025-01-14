@@ -91,7 +91,10 @@ impl Cargo {
     }
 
     fn has_features(&self) -> bool {
-        self.metadata.packages.iter().any(|p| p.features.is_empty())
+        self.metadata
+            .packages
+            .iter()
+            .any(|p| !p.features.is_empty())
     }
 
     fn has_workspace(&self) -> bool {
