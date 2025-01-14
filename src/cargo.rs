@@ -37,6 +37,7 @@ impl Cargo {
 
         let metadata = MetadataCommand::new()
             .current_dir(&working_dir)
+            .no_deps()
             .exec()
             .context(format!(
                 "failed to parse metadata of the project at {}",
@@ -90,10 +91,7 @@ impl Cargo {
     }
 
     fn has_features(&self) -> bool {
-        self.metadata
-            .packages
-            .iter()
-            .any(|package| !package.features.is_empty())
+        self.metadata.packages.iter().any(|p| p.features.is_empty())
     }
 
     fn has_workspace(&self) -> bool {
