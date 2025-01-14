@@ -1,7 +1,6 @@
 use std::env;
-use std::process::Command;
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result};
 use clap::Parser;
 
 mod cargo;
@@ -24,42 +23,10 @@ fn main() -> Result<()> {
 
     let cargo = Cargo::new(work_dir)?;
 
-    let commands = vec![
-        cargo.check(),
-        cargo.build(),
-        cargo.test(),
-        cargo.fmt(),
-        cargo.clippy(),
-    ];
+    let mut commands = cargo.base_commands();
+    commands.push(cargo.clippy());
 
-    for mut command in commands {
-        display_command(&command);
-
-        match command.status() {
-            Ok(status) if status.success() => continue,
-            Ok(_) => break,
-            Err(err) => bail!("failed to run command: {}", err),
-        }
-    }
+    commands.status()?;
 
     Ok(())
-}
-
-fn display_command(command: &Command) {
-    let mut exe = command
-        .get_program()
-        .to_str()
-        .expect("can convert program name")
-        .to_string();
-    let args = command
-        .get_args()
-        .map(|x| x.to_str().expect("can convert program args"))
-        .collect::<Vec<_>>();
-
-    for arg in args {
-        exe.push(' ');
-        exe.push_str(arg);
-    }
-
-    println!("Running {}...", exe);
 }
