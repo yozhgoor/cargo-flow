@@ -5,6 +5,7 @@ use clap::Parser;
 
 mod cargo;
 mod cli;
+mod command;
 
 use crate::cargo::Cargo;
 use crate::cli::Cli;
@@ -23,8 +24,7 @@ fn main() -> Result<()> {
 
     let cargo = Cargo::new(work_dir)?;
 
-    let mut commands = cargo.base_commands();
-    commands.push(cargo.clippy());
+    let commands = cargo.commands(cli.clean, cli.full);
 
     commands.status()?;
 
