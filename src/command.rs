@@ -38,10 +38,10 @@ impl fmt::Display for Command {
             .map(|x| x.to_str().expect("can convert program args"))
             .collect::<Vec<_>>();
 
-        for arg in args {
+        args.iter().for_each(|x| {
             exe.push(' ');
-            exe.push_str(arg);
-        }
+            exe.push_str(x);
+        });
 
         write!(f, "{}", exe)
     }
@@ -63,7 +63,10 @@ impl Commands {
             println!("Running {}", cmd);
 
             match cmd.status() {
-                Ok(status) if status.success() => continue,
+                Ok(status) if status.success() => {
+                    println!();
+                    continue;
+                }
                 Ok(_) => break,
                 Err(err) => bail!("failed to run command: {}", err),
             }
