@@ -82,6 +82,7 @@ impl Cargo {
         if full {
             command.args(["-A", "clippy::pedantic"]);
             command.args(["-A", "clippy::restriction"]);
+            command.args(["-A", "clippy::cargo"]);
         }
 
         command.args(["-D", "warnings"]);
@@ -97,7 +98,7 @@ impl Cargo {
         command
     }
 
-    pub fn commands(&self, clean: bool, full: bool) -> Commands {
+    pub fn commands(&self, clean: bool, lints: bool) -> Commands {
         let mut commands = Commands::new();
 
         if clean {
@@ -110,10 +111,8 @@ impl Cargo {
 
         commands.push(self.test());
 
-        if full {
-            commands.push(self.fmt());
-            commands.push(self.clippy(full));
-        }
+        commands.push(self.fmt());
+        commands.push(self.clippy(lints));
 
         commands
     }

@@ -24,7 +24,7 @@ fn main() -> Result<()> {
 
     let cargo = Cargo::new(work_dir)?;
 
-    let commands = cargo.commands(cli.clean, cli.full);
+    let commands = cargo.commands(cli.clean, cli.lints);
 
     commands.status()?;
 

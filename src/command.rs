@@ -63,10 +63,7 @@ impl Commands {
             println!("Running {}", cmd);
 
             match cmd.status() {
-                Ok(status) if status.success() => {
-                    println!();
-                    continue;
-                }
+                Ok(status) if status.success() => continue,
                 Ok(_) => break,
                 Err(err) => bail!("failed to run command: {}", err),
             }

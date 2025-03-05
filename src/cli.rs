@@ -12,10 +12,9 @@ pub struct Cli {
     /// Include `cargo clean` in the workflow.
     #[arg(short, long)]
     pub clean: bool,
-    /// Add the following to the default behavior:
-    /// - `clippy::pedantic` and `clippy::restriction` for the linting command
+    /// Add the `clippy::pedantic` and `clippy::restriction` groups to linting command.
     #[arg(short, long)]
-    pub full: bool,
+    pub lints: bool,
 }
 
 #[cfg(test)]
