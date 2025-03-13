@@ -149,8 +149,8 @@ impl Generate {
 
             steps.push(Step {
                 name,
-                uses: Some(x.to_string()),
-                run: None,
+                uses: None,
+                run: Some(x.to_string()),
                 with: None,
             });
         });
