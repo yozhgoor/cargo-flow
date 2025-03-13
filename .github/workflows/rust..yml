@@ -1,0 +1,23 @@
+name: rust
+on:
+  push:
+  - main
+jobs:
+  checks:
+    runs_on: ubuntu-latest
+    steps:
+    - name: Checkout source
+      uses: Actions/checkout@v3
+    - uses: Swatinem/rust-cache@v2
+      with:
+        cache_on_failure: true
+    - name: check
+      uses: cargo check
+    - name: build
+      uses: cargo build
+    - name: test
+      uses: cargo test
+    - name: fmt
+      uses: cargo fmt --all -- --check
+    - name: clippy
+      uses: cargo clippy --tests -- -D warnings

@@ -6,9 +6,11 @@ use clap::Parser;
 mod cargo;
 mod cli;
 mod command;
+mod generate;
+mod workflow;
 
 use crate::cargo::Cargo;
-use crate::cli::Cli;
+use crate::cli::{Cli, SubCommand};
 
 fn main() -> Result<()> {
     let mut args = env::args().peekable();
@@ -22,11 +24,17 @@ fn main() -> Result<()> {
         .or_else(|| env::current_dir().ok())
         .context("failed to determine working directory")?;
 
-    let cargo = Cargo::new(work_dir)?;
+    let cargo = Cargo::new(&work_dir)?;
 
-    let commands = cargo.commands(cli.clean, cli.lints);
+    if let Some(subcommand) = cli.subcommand {
+        match subcommand {
+            SubCommand::Generate(args) => args.generate(&work_dir, &cargo)?,
+        }
+    } else {
+        let commands = cargo.commands(cli.clean, cli.lints);
 
-    commands.status()?;
+        commands.status()?;
+    }
 
     Ok(())
 }

@@ -19,6 +19,16 @@ impl Command {
         self.0.args(args);
     }
 
+    pub fn get_first_arg(&self) -> Option<String> {
+        let args = self
+            .0
+            .get_args()
+            .map(|x| x.to_str().expect("can convert command arguments"))
+            .collect::<Vec<_>>();
+
+        args.first().map(|x| x.to_string())
+    }
+
     pub fn status(mut self) -> Result<process::ExitStatus> {
         Ok(self.0.status()?)
     }
@@ -70,5 +80,14 @@ impl Commands {
         }
 
         Ok(())
+    }
+}
+
+impl IntoIterator for Commands {
+    type Item = Command;
+    type IntoIter = std::vec::IntoIter<Command>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
     }
 }
