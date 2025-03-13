@@ -3,7 +3,7 @@ use clap::Args;
 use std::fs;
 use std::path::Path;
 
-use crate::workflow::{Checks, Jobs, On, Step, With, Workflow};
+use crate::workflow::{Branches, Checks, Jobs, On, Step, With, Workflow};
 use crate::Cargo;
 
 #[derive(Args, Clone, Debug)]
@@ -90,7 +90,7 @@ impl Generate {
     fn to_workflow(&self, working_dir: &Path, cargo: &Cargo) -> Workflow {
         let name = self.name.as_deref().unwrap_or("rust");
         let mut path = working_dir.join(".github").join("workflows").join(name);
-        path.set_extension(".yml");
+        path.set_extension("yml");
 
         let push = if !self.no_push {
             if let Some(branches) = self.push.as_deref() {
@@ -158,7 +158,10 @@ impl Generate {
         Workflow {
             path,
             name: name.to_string(),
-            on: On { push, pull_request },
+            on: On {
+                push: Branches(push),
+                pull_request: Branches(pull_request),
+            },
             jobs: Jobs {
                 checks: Checks { runs_on, steps },
             },

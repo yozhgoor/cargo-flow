@@ -13,10 +13,19 @@ pub struct Workflow {
 
 #[derive(Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct On {
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub push: Vec<String>,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub pull_request: Vec<String>,
+    #[serde(skip_serializing_if = "Branches::is_empty")]
+    pub push: Branches,
+    #[serde(skip_serializing_if = "Branches::is_empty")]
+    pub pull_request: Branches,
+}
+
+#[derive(Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct Branches(pub Vec<String>);
+
+impl Branches {
+    fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
 }
 
 #[derive(Debug, Deserialize, Eq, PartialEq, Serialize)]
