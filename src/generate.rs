@@ -102,7 +102,7 @@ impl Generate {
             Vec::new()
         };
 
-        let pull_request = if let Some(branches) = self.push.as_deref() {
+        let pull_request = if let Some(branches) = self.pull_request.as_deref() {
             branches.split(' ').map(|x| x.to_owned()).collect()
         } else {
             Vec::new()
