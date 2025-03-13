@@ -38,6 +38,7 @@ pub struct Jobs {
 
 #[derive(Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Checks {
+    #[serde(rename = "runs-on")]
     pub runs_on: String,
     pub steps: Vec<Step>,
 }

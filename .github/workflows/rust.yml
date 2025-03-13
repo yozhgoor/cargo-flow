@@ -8,7 +8,7 @@ on:
     - main
 jobs:
   checks:
-    runs_on: ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout source
       uses: Actions/checkout@v3
