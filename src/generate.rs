@@ -159,8 +159,10 @@ impl Generate {
             path,
             name: name.to_string(),
             on: On {
-                push: Branches(push),
-                pull_request: Branches(pull_request),
+                push: Branches { branches: push },
+                pull_request: Branches {
+                    branches: pull_request,
+                },
             },
             jobs: Jobs {
                 checks: Checks { runs_on, steps },

@@ -20,11 +20,14 @@ pub struct On {
 }
 
 #[derive(Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub struct Branches(pub Vec<String>);
+pub struct Branches {
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub branches: Vec<String>,
+}
 
 impl Branches {
     fn is_empty(&self) -> bool {
-        self.0.is_empty()
+        self.branches.is_empty()
     }
 }
 

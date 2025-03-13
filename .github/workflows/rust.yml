@@ -1,7 +1,8 @@
 name: rust
 on:
   push:
-  - main
+    branches:
+    - main
 jobs:
   checks:
     runs_on: ubuntu-latest
