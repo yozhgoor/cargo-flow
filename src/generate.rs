@@ -73,15 +73,13 @@ impl Generate {
                 .parent()
                 .expect("can find workflow file parent");
             fs::create_dir_all(workflow_dir).context("failed to create workflow directory")?;
-            fs::write(
-                &workflow.path,
-                serde_yaml::to_string(&workflow).context("failed to serialize workflow")?,
-            )
-            .context("failed to write workflow file")?;
+
+            let content = workflow.serialize_pretty();
+            fs::write(&workflow.path, content).context("failed to write workflow file")?;
 
             println!("Workflow created at {}", workflow.path.display());
         } else {
-            println!("Workflow file doesn't exist");
+            println!("Workflow file not available.");
         }
 
         Ok(())
