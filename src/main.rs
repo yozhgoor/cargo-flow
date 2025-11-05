@@ -1,7 +1,6 @@
-use std::env;
-
-use anyhow::{Context, Result};
+use anyhow::Result;
 use clap::Parser;
+use std::env;
 
 mod cargo;
 mod cli;
@@ -17,14 +16,8 @@ fn main() -> Result<()> {
 
     let cli = Cli::parse_from(command.into_iter().chain(args));
 
-    let work_dir = cli
-        .path
-        .or_else(|| env::current_dir().ok())
-        .context("failed to determine working directory")?;
-
-    let cargo = Cargo::new(work_dir)?;
-
-    let commands = cargo.commands(cli.clean, cli.lints);
+    let cargo = Cargo::new(cli)?;
+    let commands = cargo.commands();
 
     commands.status()?;
 
