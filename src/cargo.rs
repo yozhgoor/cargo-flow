@@ -74,8 +74,15 @@ impl Cargo {
 
     fn fmt(&self) -> Command {
         let mut command = Command::new(&self.working_dir);
+        command.arg("fmt");
 
-        command.args(["fmt", "--all", "--", "--check"]);
+        if let Some(package) = self.package.as_deref() {
+            command.args(["--package", package]);
+        } else {
+            command.arg("--all");
+        }
+
+        command.args(["--", "--check"]);
 
         command
     }
@@ -132,7 +139,10 @@ impl Cargo {
         }
 
         commands.push(self.fmt());
-        commands.push(self.clippy());
+
+        if self.package.is_none() {
+            commands.push(self.clippy());
+        }
 
         commands
     }
