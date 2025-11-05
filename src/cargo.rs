@@ -16,14 +16,12 @@ macro_rules! cargo_command {
 
             if let Some(ref package) = self.package {
                 command.args(["--package", package.as_ref()]);
+            } else if self.has_workspace() {
+                command.arg("--workspace");
             }
 
             if self.has_features() {
                 command.arg("--all-features");
-            }
-
-            if self.has_workspace() {
-                command.arg("--workspace");
             }
 
             command
