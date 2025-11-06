@@ -7,7 +7,7 @@ pub struct Cli {
     /// Path to the Rust project
     ///
     /// Default to the current directory.
-    #[arg(short, long)]
+    #[arg(long)]
     pub path: Option<PathBuf>,
     /// Include `cargo clean` in the workflow.
     #[arg(short, long)]
@@ -15,6 +15,12 @@ pub struct Cli {
     /// Add the `clippy::pedantic` and `clippy::restriction` groups to linting command.
     #[arg(short, long)]
     pub lints: bool,
+    /// Run the workflows without tests.
+    #[arg(short, long)]
+    pub no_tests: bool,
+    /// Package to check.
+    #[arg(short, long)]
+    pub package: Option<String>,
 }
 
 #[cfg(test)]

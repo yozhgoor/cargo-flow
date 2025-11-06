@@ -2,7 +2,10 @@ use anyhow::{Context, Result};
 use cargo_metadata::{Metadata, MetadataCommand};
 use std::path::PathBuf;
 
-use crate::command::{Command, Commands};
+use crate::{
+    command::{Command, Commands},
+    Cli,
+};
 
 macro_rules! cargo_command {
     ($name:ident) => {
@@ -11,12 +14,14 @@ macro_rules! cargo_command {
 
             command.arg(stringify!($name));
 
-            if self.has_features() {
-                command.arg("--all-features");
+            if let Some(ref package) = self.package {
+                command.args(["--package", package.as_ref()]);
+            } else if self.has_workspace() {
+                command.arg("--workspace");
             }
 
-            if self.has_workspace() {
-                command.arg("--workspace");
+            if self.has_features() {
+                command.arg("--all-features");
             }
 
             command
@@ -27,11 +32,18 @@ macro_rules! cargo_command {
 pub struct Cargo {
     metadata: Metadata,
     working_dir: PathBuf,
+    clean: bool,
+    tests: bool,
+    lints: bool,
+    package: Option<String>,
 }
 
 impl Cargo {
-    pub fn new(working_dir: impl Into<PathBuf>) -> Result<Self> {
-        let working_dir = working_dir.into();
+    pub fn new(cli: Cli) -> Result<Self> {
+        let working_dir = cli
+            .path
+            .or_else(|| std::env::current_dir().ok())
+            .context("failed to determine working directory")?;
 
         let metadata = MetadataCommand::new()
             .current_dir(&working_dir)
@@ -45,6 +57,10 @@ impl Cargo {
         Ok(Self {
             metadata,
             working_dir,
+            clean: cli.clean,
+            tests: !cli.no_tests,
+            lints: cli.lints,
+            package: cli.package,
         })
     }
 
@@ -56,13 +72,20 @@ impl Cargo {
 
     fn fmt(&self) -> Command {
         let mut command = Command::new(&self.working_dir);
+        command.arg("fmt");
 
-        command.args(["fmt", "--all", "--", "--check"]);
+        if let Some(package) = self.package.as_deref() {
+            command.args(["--package", package]);
+        } else {
+            command.arg("--all");
+        }
+
+        command.args(["--", "--check"]);
 
         command
     }
 
-    pub fn clippy(&self, full: bool) -> Command {
+    pub fn clippy(&self) -> Command {
         let mut command = Command::new(&self.working_dir);
 
         command.arg("clippy");
@@ -79,7 +102,7 @@ impl Cargo {
 
         command.arg("--");
 
-        if full {
+        if self.lints {
             command.args(["-A", "clippy::pedantic"]);
             command.args(["-A", "clippy::restriction"]);
             command.args(["-A", "clippy::cargo"]);
@@ -98,10 +121,10 @@ impl Cargo {
         command
     }
 
-    pub fn commands(&self, clean: bool, lints: bool) -> Commands {
+    pub fn commands(&self) -> Commands {
         let mut commands = Commands::new();
 
-        if clean {
+        if self.clean {
             commands.push(self.clean());
         }
 
@@ -109,10 +132,15 @@ impl Cargo {
         commands.push(self.check());
         commands.push(self.build());
 
-        commands.push(self.test());
+        if self.tests {
+            commands.push(self.test());
+        }
 
         commands.push(self.fmt());
-        commands.push(self.clippy(lints));
+
+        if self.package.is_none() {
+            commands.push(self.clippy());
+        }
 
         commands
     }
