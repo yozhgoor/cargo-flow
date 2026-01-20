@@ -21,7 +21,16 @@ macro_rules! cargo_command {
             }
 
             if self.has_features() {
-                command.arg("--all-features");
+                if !self.default_features {
+                    command.arg("--no-default-features");
+                } else if !self.features.is_empty() {
+                    command.arg("--features");
+                    for feature in &self.features {
+                        command.arg(feature);
+                    }
+                } else {
+                    command.arg("--all-features");
+                }
             }
 
             command
@@ -35,7 +44,9 @@ pub struct Cargo {
     clean: bool,
     tests: bool,
     lints: bool,
+    default_features: bool,
     package: Option<String>,
+    features: Vec<String>,
 }
 
 impl Cargo {
@@ -60,7 +71,9 @@ impl Cargo {
             clean: cli.clean,
             tests: !cli.no_tests,
             lints: cli.lints,
+            default_features: !cli.no_default_features,
             package: cli.package,
+            features: cli.features,
         })
     }
 
@@ -91,14 +104,25 @@ impl Cargo {
         command.arg("clippy");
 
         if self.has_features() {
-            command.arg("--all-features");
+            if !self.default_features {
+                command.arg("--no-default-features");
+            } else if !self.features.is_empty() {
+                command.arg("--features");
+                for feature in &self.features {
+                    command.arg(feature);
+                }
+            } else {
+                command.arg("--all-features");
+            }
         }
 
         if self.has_workspace() {
             command.arg("--workspace");
         }
 
-        command.arg("--tests");
+        if self.tests {
+            command.arg("--tests");
+        }
 
         command.arg("--");
 

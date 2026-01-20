@@ -16,11 +16,17 @@ pub struct Cli {
     #[arg(short, long)]
     pub lints: bool,
     /// Run the workflows without tests.
-    #[arg(short, long)]
+    #[arg(short = 't', long)]
     pub no_tests: bool,
     /// Package to check.
     #[arg(short, long)]
     pub package: Option<String>,
+    /// Run the workflow with no default features
+    #[arg(short = 'n', long)]
+    pub no_default_features: bool,
+    /// Run the workflow with selected features.
+    #[arg(short = 'f', long)]
+    pub features: Vec<String>,
 }
 
 #[cfg(test)]
