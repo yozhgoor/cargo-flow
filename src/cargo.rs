@@ -7,37 +7,6 @@ use crate::{
     Cli,
 };
 
-macro_rules! cargo_command {
-    ($name:ident) => {
-        fn $name(&self) -> Command {
-            let mut command = Command::new(&self.working_dir);
-
-            command.arg(stringify!($name));
-
-            if let Some(ref package) = self.package {
-                command.args(["--package", package.as_ref()]);
-            } else if self.has_workspace() {
-                command.arg("--workspace");
-            }
-
-            if self.has_features() {
-                if !self.default_features {
-                    command.arg("--no-default-features");
-                } else if !self.features.is_empty() {
-                    command.arg("--features");
-                    for feature in &self.features {
-                        command.arg(feature);
-                    }
-                } else {
-                    command.arg("--all-features");
-                }
-            }
-
-            command
-        }
-    };
-}
-
 pub struct Cargo {
     metadata: Metadata,
     working_dir: PathBuf,
@@ -77,31 +46,20 @@ impl Cargo {
         })
     }
 
-    cargo_command!(check);
-
-    cargo_command!(build);
-
-    cargo_command!(test);
-
-    fn fmt(&self) -> Command {
+    fn base_command(&self, name: &str) -> Command {
         let mut command = Command::new(&self.working_dir);
-        command.arg("fmt");
 
-        if let Some(package) = self.package.as_deref() {
-            command.args(["--package", package]);
-        } else {
-            command.arg("--all");
+        command.arg(name);
+
+        if let Some(ref package) = self.package {
+            command.args(["--package", package.as_ref()]);
+        } else if self.has_workspace() {
+            if name == "fmt" {
+                command.arg("--all");
+            } else {
+                command.arg("--workspace");
+            }
         }
-
-        command.args(["--", "--check"]);
-
-        command
-    }
-
-    pub fn clippy(&self) -> Command {
-        let mut command = Command::new(&self.working_dir);
-
-        command.arg("clippy");
 
         if self.has_features() {
             if !self.default_features {
@@ -116,9 +74,31 @@ impl Cargo {
             }
         }
 
-        if self.has_workspace() {
-            command.arg("--workspace");
-        }
+        command
+    }
+
+    fn check(&self) -> Command {
+        self.base_command("check")
+    }
+
+    fn build(&self) -> Command {
+        self.base_command("build")
+    }
+
+    fn test(&self) -> Command {
+        self.base_command("test")
+    }
+
+    fn fmt(&self) -> Command {
+        let mut command = self.base_command("fmt");
+
+        command.args(["--", "--check"]);
+
+        command
+    }
+
+    fn clippy(&self) -> Command {
+        let mut command = self.base_command("clippy");
 
         if self.tests {
             command.arg("--tests");
@@ -137,7 +117,7 @@ impl Cargo {
         command
     }
 
-    pub fn clean(&self) -> Command {
+    fn clean(&self) -> Command {
         let mut command = Command::new(&self.working_dir);
 
         command.arg("clean");
@@ -152,7 +132,6 @@ impl Cargo {
             commands.push(self.clean());
         }
 
-        // Base commands
         commands.push(self.check());
         commands.push(self.build());
 
@@ -161,10 +140,7 @@ impl Cargo {
         }
 
         commands.push(self.fmt());
-
-        if self.package.is_none() {
-            commands.push(self.clippy());
-        }
+        commands.push(self.clippy());
 
         commands
     }
