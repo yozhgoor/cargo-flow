@@ -54,11 +54,7 @@ impl Cargo {
         if let Some(ref package) = self.package {
             command.args(["--package", package.as_ref()]);
         } else if self.has_workspace() {
-            if name == "fmt" {
-                command.arg("--all");
-            } else {
-                command.arg("--workspace");
-            }
+            command.arg("--workspace");
         }
 
         if self.has_features() {
@@ -90,7 +86,14 @@ impl Cargo {
     }
 
     fn fmt(&self) -> Command {
-        let mut command = self.base_command("fmt");
+        let mut command = Command::new(&self.working_dir);
+        command.arg("fmt");
+
+        if let Some(package) = self.package.as_deref() {
+            command.args(["--package", package]);
+        } else {
+            command.arg("--all");
+        }
 
         command.args(["--", "--check"]);
 
