@@ -19,8 +19,16 @@ impl Command {
         self.0.args(args);
     }
 
-    pub fn status(mut self) -> Result<process::ExitStatus> {
-        Ok(self.0.status()?)
+    fn run(mut self) -> Result<()> {
+        println!("Running {}", self);
+
+        match self.0.status() {
+            Ok(status) if status.success() => Ok(()),
+            Ok(status) => {
+                bail!("\nCommand failed ({status})");
+            }
+            Err(err) => bail!("failed to run command: {err}"),
+        }
     }
 }
 
@@ -47,31 +55,27 @@ impl fmt::Display for Command {
     }
 }
 
-#[derive(Default)]
-pub struct Commands(Vec<Command>);
+pub struct Commands {
+    pub clean: Option<Command>,
+    pub check: Command,
+    pub build: Command,
+    pub test: Option<Command>,
+    pub fmt: Command,
+    pub clippy: Command,
+}
 
 impl Commands {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn push(&mut self, cmd: Command) {
-        self.0.push(cmd);
-    }
-
-    pub fn status(self) -> Result<()> {
-        for cmd in self.0 {
-            println!("Running {cmd}");
-
-            match cmd.status() {
-                Ok(status) if status.success() => {}
-                Ok(status) => {
-                    eprintln!("\nCommand failed ({status})");
-                    break;
-                }
-                Err(err) => bail!("failed to run command: {err}"),
-            }
+    pub fn run(self) -> Result<()> {
+        if let Some(clean) = self.clean {
+            clean.run()?;
         }
+        self.check.run()?;
+        self.build.run()?;
+        if let Some(test) = self.test {
+            test.run()?;
+        }
+        self.fmt.run()?;
+        self.clippy.run()?;
 
         Ok(())
     }
