@@ -2,6 +2,11 @@
 name = "cargo-flow"
 version = "0.1.0"
 edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "A CLI helper to manage Rust project's workflows efficiently."
+repository = "https://github.com/yozhgoor/cargo-flow"
+keywords = ["cargo", "workflow", "project", "cli"]
+categories = ["development-tools::cargo-plugins"]
 
 [dependencies]
 anyhow = "1"

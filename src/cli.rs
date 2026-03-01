@@ -3,6 +3,7 @@ use std::path::PathBuf;
 /// CLI helper to manage Rust project's workflows efficiently.
 #[derive(clap::Parser, Debug, Clone)]
 #[command(author, version, about, long_about)]
+#[allow(clippy::struct_excessive_bools)]
 pub struct Cli {
     /// Path to the Rust project
     ///
