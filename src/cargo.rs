@@ -7,6 +7,7 @@ use crate::{
     Cli,
 };
 
+#[allow(clippy::struct_excessive_bools)]
 pub struct Cargo {
     metadata: Metadata,
     working_dir: PathBuf,
@@ -60,6 +61,12 @@ impl Cargo {
         if self.has_features() {
             if !self.default_features {
                 command.arg("--no-default-features");
+                if !self.features.is_empty() {
+                    command.arg("--features");
+                    for feature in &self.features {
+                        command.arg(feature);
+                    }
+                }
             } else if !self.features.is_empty() {
                 command.arg("--features");
                 for feature in &self.features {
@@ -110,9 +117,8 @@ impl Cargo {
         command.arg("--");
 
         if self.lints {
-            command.args(["-A", "clippy::pedantic"]);
-            command.args(["-A", "clippy::restriction"]);
-            command.args(["-A", "clippy::cargo"]);
+            command.args(["-W", "clippy::pedantic"]);
+            command.args(["-W", "clippy::cargo"]);
         }
 
         command.args(["-D", "warnings"]);

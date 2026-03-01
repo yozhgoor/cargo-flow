@@ -38,20 +38,21 @@ impl fmt::Display for Command {
             .map(|x| x.to_str().expect("can convert program args"))
             .collect::<Vec<_>>();
 
-        args.iter().for_each(|x| {
+        for arg in &args {
             exe.push(' ');
-            exe.push_str(x);
-        });
+            exe.push_str(arg);
+        }
 
-        write!(f, "{}", exe)
+        write!(f, "{exe}")
     }
 }
 
+#[derive(Default)]
 pub struct Commands(Vec<Command>);
 
 impl Commands {
     pub fn new() -> Self {
-        Self(Vec::new())
+        Self::default()
     }
 
     pub fn push(&mut self, cmd: Command) {
@@ -60,12 +61,15 @@ impl Commands {
 
     pub fn status(self) -> Result<()> {
         for cmd in self.0 {
-            println!("Running {}", cmd);
+            println!("Running {cmd}");
 
             match cmd.status() {
-                Ok(status) if status.success() => continue,
-                Ok(_) => break,
-                Err(err) => bail!("failed to run command: {}", err),
+                Ok(status) if status.success() => {}
+                Ok(status) => {
+                    eprintln!("\nCommand failed ({status})");
+                    break;
+                }
+                Err(err) => bail!("failed to run command: {err}"),
             }
         }
 

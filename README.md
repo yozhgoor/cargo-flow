@@ -1,6 +1,6 @@
 # cargo-flow
 
-A CLI helper to manager Rust project's workflows efficiently.
+A CLI helper to manage Rust project's workflows efficiently.
 
 ## Usage
 
