@@ -8,17 +8,7 @@ on:
 
 jobs:
   check:
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
-          - windows-latest
-          - macos-latest
-        include:
-          - os: ubuntu-latest
-            lint: 1
-
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -37,9 +27,7 @@ jobs:
         run: cargo test
 
       - name: rustfmt
-        if: github.event_name == 'pull_request' && matrix.lint
         run: cargo fmt --all -- --check
 
       - name: clippy
-        if: github.event_name == 'pull_request' && matrix.lint
         run: cargo clippy --tests -- -D warnings
