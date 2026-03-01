@@ -2,9 +2,9 @@ name: Rust
 
 on:
   push:
-    branches: [ main ]
+    branches: [ {{branch}} ]
   pull_request:
-    branches: [ main ]
+    branches: [ {{branch}} ]
 
 jobs:
   check:
@@ -18,16 +18,16 @@ jobs:
           cache-on-failure: true
 
       - name: cargo check
-        run: cargo check
+        run: {{check}}
 
       - name: cargo build
-        run: cargo build
+        run: {{build}}
 
       - name: cargo test
-        run: cargo test
+        run: {{test}}
 
       - name: rustfmt
-        run: cargo fmt --all -- --check
+        run: {{fmt}}
 
       - name: clippy
-        run: cargo clippy --tests -- -D warnings
+        run: {{clippy}}

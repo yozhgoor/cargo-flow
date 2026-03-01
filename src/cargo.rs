@@ -1,10 +1,10 @@
 use anyhow::{Context, Result};
 use cargo_metadata::{Metadata, MetadataCommand};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::{
     command::{Command, Commands},
-    Cli,
+    Cli, Subcommands,
 };
 
 #[allow(clippy::struct_excessive_bools)]
@@ -35,11 +35,13 @@ impl Cargo {
                 working_dir.display()
             ))?;
 
+        let is_generate = matches!(cli.subcommands, Some(Subcommands::Generate(_)));
+
         Ok(Self {
             metadata,
             working_dir,
-            clean: cli.clean,
-            tests: !cli.no_tests,
+            clean: cli.clean && !is_generate,
+            tests: !cli.no_tests || is_generate,
             lints: cli.lints,
             default_features: !cli.no_default_features,
             package: cli.package,
@@ -110,10 +112,7 @@ impl Cargo {
     fn clippy(&self) -> Command {
         let mut command = self.base_command("clippy");
 
-        if self.tests {
-            command.arg("--tests");
-        }
-
+        command.arg("--tests");
         command.arg("--");
 
         if self.lints {
@@ -135,23 +134,14 @@ impl Cargo {
     }
 
     pub fn commands(&self) -> Commands {
-        let mut commands = Commands::new();
-
-        if self.clean {
-            commands.push(self.clean());
+        Commands {
+            clean: self.clean.then(|| self.clean()),
+            check: self.check(),
+            build: self.build(),
+            test: self.tests.then(|| self.test()),
+            fmt: self.fmt(),
+            clippy: self.clippy(),
         }
-
-        commands.push(self.check());
-        commands.push(self.build());
-
-        if self.tests {
-            commands.push(self.test());
-        }
-
-        commands.push(self.fmt());
-        commands.push(self.clippy());
-
-        commands
     }
 
     fn has_features(&self) -> bool {
@@ -163,5 +153,9 @@ impl Cargo {
 
     fn has_workspace(&self) -> bool {
         self.metadata.workspace_members.len() > 1
+    }
+
+    pub fn working_dir(&self) -> &Path {
+        &self.working_dir
     }
 }

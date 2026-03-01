@@ -1,0 +1,45 @@
+name: Rust
+
+on:
+  push:
+    branches: [ {{branch}} ]
+  pull_request:
+    branches: [[ {{branch}} ]
+
+jobs:
+  check:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+        include:
+          - os: ubuntu-latest
+            lint: 1
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+
+      - name: cargo check
+        run: {{check}}
+
+      - name: cargo build
+        run: {{build}}
+
+      - name: cargo test
+        run: {{test}}
+
+      - name: rustfmt
+        if: github.event_name == 'pull_request' && matrix.lint
+        run: {{fmt}}
+
+      - name: clippy
+        if: github.event_name == 'pull_request' && matrix.lint
+        run: {{clippy}}
