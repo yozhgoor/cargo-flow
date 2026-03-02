@@ -25,7 +25,7 @@ impl Command {
         match self.0.status() {
             Ok(status) if status.success() => Ok(()),
             Ok(status) => {
-                bail!("\nCommand failed ({status})");
+                bail!("command failed ({status})");
             }
             Err(err) => bail!("failed to run command: {err}"),
         }
