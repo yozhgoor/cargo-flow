@@ -3,6 +3,9 @@ use std::fs;
 
 use crate::cargo::Cargo;
 
+const CHECKOUT_ACTION: &str = "actions/checkout@v6";
+const RUST_CACHE_ACTION: &str = "Swatinem/rust-cache@v2";
+
 /// Generate a GitHub Actions workflow file for this project.
 #[derive(clap::Args, Clone, Debug)]
 pub struct Generate {
@@ -54,6 +57,8 @@ impl Generate {
 
         self.template
             .content()
+            .replace("{{checkout}}", CHECKOUT_ACTION)
+            .replace("{{rust_cache}}", RUST_CACHE_ACTION)
             .replace("{{branch}}", &self.branch)
             .replace("{{check}}", &commands.check.to_string())
             .replace("{{build}}", &commands.build.to_string())
